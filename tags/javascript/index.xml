@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>javascript on Programming Posts</title>
+    <link>/tags/javascript/</link>
+    <description>Recent content in javascript on Programming Posts</description>
+    <image>
+      <url>%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Sun, 12 Sep 2021 11:30:03 +0000</lastBuildDate><atom:link href="/tags/javascript/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How to check if there was a collision between two rotated rectangles</title>
+      <link>/post/test/</link>
+      <pubDate>Sun, 12 Sep 2021 11:30:03 +0000</pubDate>
+      
+      <guid>/post/test/</guid>
+      <description>Recently I had the need to determine whether or not two rotated rectangles were colliding. These rectangles were rotated around their centers and were of the form x, y, w, h, a, where a is the rotation angle in radians.
+I searched online for a bit and found out that one way is to convert the rectangles into a series of line segments and then use the Separating Axis Theorem to determine if there was an intersection.</description>
+    </item>
+    
+  </channel>
+</rss>
