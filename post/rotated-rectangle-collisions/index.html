@@ -1,0 +1,168 @@
+<!doctype html><html lang=en dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>How to check if there was a collision between two rotated rectangles | Programming Posts</title>
+<meta name=keywords content="javascript,math,collision">
+<meta name=description content="Recently I had the need to determine whether or not two rotated rectangles were colliding. These rectangles were rotated around their centers and were of the form x, y, w, h, a, where a is the rotation angle in radians.
+I searched online for a bit and found out that one way is to convert the rectangles into a series of line segments and then use the Separating Axis Theorem to determine if there was an intersection.">
+<meta name=author content="Phretaddin">
+<link rel=canonical href=/post/rotated-rectangle-collisions/>
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.9f1d947375927e9847272b1f4e9be81336f539e513bf04d52cade31f81cad1af.css integrity="sha256-nx2Uc3WSfphHJysfTpvoEzb1OeUTvwTVLK3jH4HK0a8=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=%3Clink%20/%20abs%20url%3E>
+<link rel=icon type=image/png sizes=16x16 href=%3Clink%20/%20abs%20url%3E>
+<link rel=icon type=image/png sizes=32x32 href=%3Clink%20/%20abs%20url%3E>
+<link rel=apple-touch-icon href=%3Clink%20/%20abs%20url%3E>
+<link rel=mask-icon href=%3Clink%20/%20abs%20url%3E>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.88.1">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:#1d1e20;--entry:#2e2e33;--primary:rgba(255, 255, 255, 0.84);--secondary:rgba(255, 255, 255, 0.56);--tertiary:rgba(255, 255, 255, 0.16);--content:rgba(255, 255, 255, 0.74);--hljs-bg:#2e2e33;--code-bg:#37383e;--border:#333}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript><meta property="og:title" content="How to check if there was a collision between two rotated rectangles">
+<meta property="og:description" content="Recently I had the need to determine whether or not two rotated rectangles were colliding. These rectangles were rotated around their centers and were of the form x, y, w, h, a, where a is the rotation angle in radians.
+I searched online for a bit and found out that one way is to convert the rectangles into a series of line segments and then use the Separating Axis Theorem to determine if there was an intersection.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="/post/rotated-rectangle-collisions/">
+<meta property="og:image" content="%3Cimage%20path/url%3E"><meta property="article:section" content="post">
+<meta property="article:published_time" content="2021-09-12T11:30:03+00:00">
+<meta property="article:modified_time" content="2021-09-12T11:30:03+00:00"><meta property="og:site_name" content="Programming Posts">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="%3Cimage%20path/url%3E">
+<meta name=twitter:title content="How to check if there was a collision between two rotated rectangles">
+<meta name=twitter:description content="Recently I had the need to determine whether or not two rotated rectangles were colliding. These rectangles were rotated around their centers and were of the form x, y, w, h, a, where a is the rotation angle in radians.
+I searched online for a bit and found out that one way is to convert the rectangles into a series of line segments and then use the Separating Axis Theorem to determine if there was an intersection.">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":2,"name":"Posts","item":"/post/"},{"@type":"ListItem","position":3,"name":"How to check if there was a collision between two rotated rectangles","item":"/post/rotated-rectangle-collisions/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"How to check if there was a collision between two rotated rectangles","name":"How to check if there was a collision between two rotated rectangles","description":"Recently I had the need to determine whether or not two rotated rectangles were colliding. These rectangles were rotated around their centers and were of the form x, y, w, h, a, where a is the rotation angle in radians.\nI searched online for a bit and found out that one way is to convert the rectangles into a series of line segments and then use the Separating Axis Theorem to determine if there was an intersection.","keywords":["javascript","math","collision"],"articleBody":"Recently I had the need to determine whether or not two rotated rectangles were colliding. These rectangles were rotated around their centers and were of the form x, y, w, h, a, where a is the rotation angle in radians.\nI searched online for a bit and found out that one way is to convert the rectangles into a series of line segments and then use the Separating Axis Theorem to determine if there was an intersection.\nThis is a general technique to find out where or not there is an intersection between two convex polygons. I was wondering if there was possibly something more specific that I could use in this case because they are just rotated rectangles, and not complex polygons.\nI thought of the case of how to find the collision between a rotated rectangle and a circle. In that situation you can simply rotate both of them by the negative amount of how much the rectangle was rotated by. This moves the circle and makes the rectangle no longer rotated. Then you simply determine whether or not there is a collision between a rectangle and a circle, which is trivial:\nfunction clamp(value, min, max) {\rreturn Math.min(Math.max(value, min), max);\r}\rfunction circleRectangleCollision(cX, cY, cR, rX, rY, rW, rH) {\rlet x = clamp(cX, rX, rX + rW);\rlet y = clamp(cY, rY, rY + rH);\rlet dX = x - cX;\rlet dY = y - cY;\rreturn dX * dX + dY * dY  I was wondering if this technique could also work for finding whether or not there was a collision between two rotated rectangles.\nHowever, it didn’t seem likely. If you try to rotate both rectangles by the negative amount of one of them, then sure one of them becomes a trivial AABB (axis-aligned bounding box) rectangle, but the other one is still rotated (but now by a different amount). So, now what? Checking for collisions between two AABB rectangles is trivial, so I was hoping I could leverage that function:\nfunction rectanglesCollide(r1X, r1Y, r1W, r1H, r2X, r2Y, r2W, r2H) {\rreturn r1X r2X \u0026\u0026 r1Y r2Y;\r}\r Maybe you could calculate the bounding box for the second, still rotated rectangle and use the doRectanglesCollide function to test for collisions that way? Unfortunately, that fails in cases like this, where the rectangles are close, but still not colliding:\nThen I had the idea that maybe you could do a two-pass check. I had no intuition behind why this would work, as math is not my strong suit. It was just a hunch.\nSo, first we would rotate both rectangles by the negative amount of the first rectangle’s rotation angle. This would make the first rectangle a trivial axis-aligned rectangle. Now we calculate the bounding box for the second still-rotated rectangle and then check whether or not they collide. Okay, nothing different so far.\nHowever, now we rotate both of the rectangles by the negative amount of the second rectangle’s rotation angle. Now this time the second rectangle is a trivial axis-aligned rectangle. We then calculate the bounding box for the first rectangle and check whether or not there is a collision between those two.\nAnd apparently, for mathematical reasons I do not understand, if both of these checks results in a collision, then the two rotated rectangles are colliding. I spent a couple days coding this up and optimizing it, and ended up coming up with this function, which seems to work:\nfunction rotatedRectanglesCollide(r1X, r1Y, r1W, r1H, r1A, r2X, r2Y, r2W, r2H, r2A) {\rlet r1HW = r1W / 2;\rlet r1HH = r1H / 2;\rlet r2HW = r2W / 2;\rlet r2HH = r2H / 2;\rlet r1CX = r1X + r1HW;\rlet r1CY = r1Y + r1HH;\rlet r2CX = r2X + r2HW;\rlet r2CY = r2Y + r2HH;\rlet cosR1A = Math.cos(r1A);\rlet sinR1A = Math.sin(r1A);\rlet cosR2A = Math.cos(r2A);\rlet sinR2A = Math.sin(r2A);\rlet r1RX = cosR2A * (r1CX - r2CX) + sinR2A * (r1CY - r2CY) + r2CX - r1HW;\rlet r1RY = -sinR2A * (r1CX - r2CX) + cosR2A * (r1CY - r2CY) + r2CY - r1HH;\rlet r2RX = cosR1A * (r2CX - r1CX) + sinR1A * (r2CY - r1CY) + r1CX - r2HW;\rlet r2RY = -sinR1A * (r2CX - r1CX) + cosR1A * (r2CY - r1CY) + r1CY - r2HH;\rlet cosR1AR2A = Math.abs(cosR1A * cosR2A + sinR1A * sinR2A);\rlet sinR1AR2A = Math.abs(sinR1A * cosR2A - cosR1A * sinR2A);\rlet cosR2AR1A = Math.abs(cosR2A * cosR1A + sinR2A * sinR1A);\rlet sinR2AR1A = Math.abs(sinR2A * cosR1A - cosR2A * sinR1A);\rlet r1BBH = r1W * sinR1AR2A + r1H * cosR1AR2A;\rlet r1BBW = r1W * cosR1AR2A + r1H * sinR1AR2A;\rlet r1BBX = r1RX + r1HW - r1BBW / 2;\rlet r1BBY = r1RY + r1HH - r1BBH / 2;\rlet r2BBH = r2W * sinR2AR1A + r2H * cosR2AR1A;\rlet r2BBW = r2W * cosR2AR1A + r2H * sinR2AR1A;\rlet r2BBX = r2RX + r2HW - r2BBW / 2;\rlet r2BBY = r2RY + r2HH - r2BBH / 2;\rreturn r1X r2BBX \u0026\u0026 r1Y r2BBY \u0026\u0026\rr2X r1BBX \u0026\u0026 r2Y r1BBY;\r}\r It’s a bit lengthy unfortunately but I also think it’s pretty pretty with its symmetry. I’m not sure if this is a novel technique or if it’s known, but I’m pretty proud of it regardless. Feel free to let me know if you can think of any further optimizations to speed this up some more, or if you’re aware of any other techniques for calculating collisions between rotated rectangles.\nI’ll try my best to answer questions, but I must admit my mathematical skill is not the greatest, so no promises! Anyways, thanks for reading, and enjoy! Here’s a demo below (use WASD to control the one rectangle)\n\r\rbody { margin: 0; overflow: hidden; }\rcanvas { border: 1px solid #333; }\r\r\rlet canvas = document.querySelector(\"canvas\");\rlet ctx = canvas.getContext(\"2d\");\rlet speed = 1;\rlet xVel = 0;\rlet yVel = 0;\rdocument.addEventListener(\"keydown\", e = {\rswitch (e.key) {\rcase \"a\": xVel = -speed; break;\rcase \"d\": xVel = speed; break;\rcase \"w\": yVel = -speed; break;\rcase \"s\": yVel = speed; break;\rcase \"q\": myR1A += 0.1; break;\r}\r});\rdocument.addEventListener(\"keyup\", e = {\rswitch (e.key) {\rcase \"a\": xVel = 0; break;\rcase \"d\": xVel = 0; break;\rcase \"w\": yVel = 0; break;\rcase \"s\": yVel = 0; break;\r}\r});\rfunction drawRectangle(rX, rY, rW, rH) {\rctx.beginPath();\rctx.rect(rX, rY, rW, rH);\rctx.stroke();\r}\rfunction rotateCanvas(radians, centerX, centerY) {\rctx.translate(centerX, centerY);\rctx.rotate(radians);\rctx.translate(-centerX, -centerY);\r}\rfunction drawRotatedRectangle(rX, rY, rW, rH, rAngle) {\rlet rXCenter = rX + rW / 2;\rlet rYCenter = rY + rH / 2;\rrotateCanvas(rAngle, rXCenter, rYCenter);\rdrawRectangle(rX, rY, rW, rH);\rrotateCanvas(-rAngle, rXCenter, rYCenter);\r}\rfunction isCollision(r1X, r1Y, r1W, r1H, r1A, r2X, r2Y, r2W, r2H, r2A) {\rlet r1HW = r1W / 2;\rlet r1HH = r1H / 2;\rlet r2HW = r2W / 2;\rlet r2HH = r2H / 2;\rlet r1CX = r1X + r1HW;\rlet r1CY = r1Y + r1HH;\rlet r2CX = r2X + r2HW;\rlet r2CY = r2Y + r2HH;\rlet cosR1A = Math.cos(r1A);\rlet sinR1A = Math.sin(r1A);\rlet cosR2A = Math.cos(r2A);\rlet sinR2A = Math.sin(r2A);\rlet r1RX = cosR2A * (r1CX - r2CX) + sinR2A * (r1CY - r2CY) + r2CX - r1HW;\rlet r1RY = -sinR2A * (r1CX - r2CX) + cosR2A * (r1CY - r2CY) + r2CY - r1HH;\rlet r2RX = cosR1A * (r2CX - r1CX) + sinR1A * (r2CY - r1CY) + r1CX - r2HW;\rlet r2RY = -sinR1A * (r2CX - r1CX) + cosR1A * (r2CY - r1CY) + r1CY - r2HH;\rlet cosR1AR2A = Math.abs(cosR1A * cosR2A + sinR1A * sinR2A);\rlet sinR1AR2A = Math.abs(sinR1A * cosR2A - cosR1A * sinR2A);\rlet cosR2AR1A = Math.abs(cosR2A * cosR1A + sinR2A * sinR1A);\rlet sinR2AR1A = Math.abs(sinR2A * cosR1A - cosR2A * sinR1A);\rlet r1BBH = r1W * sinR1AR2A + r1H * cosR1AR2A;\rlet r1BBW = r1W * cosR1AR2A + r1H * sinR1AR2A;\rlet r1BBX = r1RX + r1HW - r1BBW / 2;\rlet r1BBY = r1RY + r1HH - r1BBH / 2;\rlet r2BBH = r2W * sinR2AR1A + r2H * cosR2AR1A;\rlet r2BBW = r2W * cosR2AR1A + r2H * sinR2AR1A;\rlet r2BBX = r2RX + r2HW - r2BBW / 2;\rlet r2BBY = r2RY + r2HH - r2BBH / 2;\rreturn r1X r2BBX \u0026\u0026 r1Y r2BBY \u0026\u0026\rr2X r1BBX \u0026\u0026 r2Y r1BBY;\r}\rlet myR1X = 200;\rlet myR1Y = 212;\rlet myR1W = 150;\rlet myR1H = 30;\rlet myR1A = -30 * (Math.PI / 180);\rlet myR2X = 230;\rlet myR2Y = 258;\rlet myR2W = 35;\rlet myR2H = 25;\rlet myR2A = -110 * (Math.PI / 180);\rfunction renderLoop(elapsed) {\rcanvas.width = 400;\rcanvas.height = 400;\rlet isColliding = isCollision(myR1X, myR1Y, myR1W, myR1H, myR1A, myR2X, myR2Y, myR2W, myR2H, myR2A);\rctx.strokeStyle = isColliding ? \"#ff0000\" : \"#000000\";\rdrawRotatedRectangle(myR1X, myR1Y, myR1W, myR1H, myR1A);\rdrawRotatedRectangle(myR2X, myR2Y, myR2W, myR2H, myR2A);\rmyR1X += xVel;\rmyR1Y += yVel;\rrequestAnimationFrame(renderLoop);\r}\rrenderLoop();\r ","wordCount":"1567","inLanguage":"en","image":"%3Cimage%20path/url%3E","datePublished":"2021-09-12T11:30:03Z","dateModified":"2021-09-12T11:30:03Z","author":{"@type":"Person","name":"Phretaddin"},"mainEntityOfPage":{"@type":"WebPage","@id":"/post/rotated-rectangle-collisions/"},"publisher":{"@type":"Organization","name":"Programming Posts","logo":{"@type":"ImageObject","url":"%3Clink%20/%20abs%20url%3E"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href accesskey=h title="Programming Posts (Alt + H)">Programming Posts</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=/categories/ title=categories>
+<span>categories</span>
+</a>
+</li>
+<li>
+<a href=/tags/ title=tags>
+<span>tags</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href>Home</a>&nbsp;»&nbsp;<a href=/post/>Posts</a></div>
+<h1 class=post-title>
+How to check if there was a collision between two rotated rectangles
+</h1>
+<div class=post-meta>September 12, 2021&nbsp;·&nbsp;8 min&nbsp;·&nbsp;Phretaddin
+</div>
+</header>
+<div class=post-content><p>Recently I had the need to determine whether or not two rotated rectangles were colliding. These rectangles were rotated around their centers and were of the form <code>x, y, w, h, a</code>, where <code>a</code> is the rotation angle in radians.</p>
+<p>I searched online for a bit and found out that <a href=https://stackoverflow.com/questions/10962379/how-to-check-intersection-between-2-rotated-rectangles>one way</a> is to convert the rectangles into a series of line segments and then use the <a href=https://en.wikipedia.org/wiki/Hyperplane_separation_theorem#Use_in_collision_detection>Separating Axis Theorem</a> to determine if there was an intersection.</p>
+<p>This is a general technique to find out where or not there is an intersection between two convex polygons. I was wondering if there was possibly something more specific that I could use in this case because they are just rotated rectangles, and not complex polygons.</p>
+<p>I thought of the case of how to find the collision between a rotated rectangle and a circle. In that situation you can simply rotate both of them by the negative amount of how much the rectangle was rotated by. This moves the circle and makes the rectangle no longer rotated. Then you simply determine whether or not there is a collision between a rectangle and a circle, which is trivial:</p>
+<pre><code>function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function circleRectangleCollision(cX, cY, cR, rX, rY, rW, rH) {
+  let x = clamp(cX, rX, rX + rW);
+  let y = clamp(cY, rY, rY + rH);
+
+  let dX = x - cX;
+  let dY = y - cY;
+
+  return dX * dX + dY * dY &lt; cR * cR;
+}
+</code></pre>
+<p>I was wondering if this technique could also work for finding whether or not there was a collision between two rotated rectangles.</p>
+<p>However, it didn&rsquo;t seem likely. If you try to rotate both rectangles by the negative amount of one of them, then sure one of them becomes a trivial AABB (axis-aligned bounding box) rectangle, but the other one is still rotated (but now by a different amount). So, now what? Checking for collisions between two AABB rectangles is trivial, so I was hoping I could leverage that function:</p>
+<pre><code>function rectanglesCollide(r1X, r1Y, r1W, r1H, r2X, r2Y, r2W, r2H) {
+  return r1X &lt; r2X + r2W &amp;&amp; r1X + r1W &gt; r2X &amp;&amp; r1Y &lt; r2Y + r2H &amp;&amp; r1Y + r1H &gt; r2Y;
+}
+</code></pre>
+<p>Maybe you could calculate the bounding box for the second, still rotated rectangle and use the <code>doRectanglesCollide</code> function to test for collisions that way? Unfortunately, that fails in cases like this, where the rectangles are close, but still not colliding:</p>
+<p><img loading=lazy src=https://i.imgur.com/elGMpu7.png alt="Wrong collision">
+</p>
+<p>Then I had the idea that maybe you could do a two-pass check. I had no intuition behind why this would work, as math is not my strong suit. It was just a hunch.</p>
+<p>So, first we would rotate both rectangles by the negative amount of the first rectangle&rsquo;s rotation angle. This would make the first rectangle a trivial axis-aligned rectangle. Now we calculate the bounding box for the second still-rotated rectangle and then check whether or not they collide. Okay, nothing different so far.</p>
+<p>However, now we rotate both of the rectangles by the negative amount of the <em>second</em> rectangle&rsquo;s rotation angle. Now this time the second rectangle is a trivial axis-aligned rectangle. We then calculate the bounding box for the first rectangle and check whether or not there is a collision between those two.</p>
+<p>And apparently, for mathematical reasons I do not understand, if <em>both</em> of these checks results in a collision, then the two rotated rectangles are colliding. I spent a couple days coding this up and optimizing it, and ended up coming up with this function, which seems to work:</p>
+<pre><code>function rotatedRectanglesCollide(r1X, r1Y, r1W, r1H, r1A, r2X, r2Y, r2W, r2H, r2A) {
+  let r1HW = r1W / 2;
+  let r1HH = r1H / 2;
+  let r2HW = r2W / 2;
+  let r2HH = r2H / 2;
+
+  let r1CX = r1X + r1HW;
+  let r1CY = r1Y + r1HH;
+  let r2CX = r2X + r2HW;
+  let r2CY = r2Y + r2HH;
+
+  let cosR1A = Math.cos(r1A);
+  let sinR1A = Math.sin(r1A);
+  let cosR2A = Math.cos(r2A);
+  let sinR2A = Math.sin(r2A);
+
+  let r1RX =  cosR2A * (r1CX - r2CX) + sinR2A * (r1CY - r2CY) + r2CX - r1HW;
+  let r1RY = -sinR2A * (r1CX - r2CX) + cosR2A * (r1CY - r2CY) + r2CY - r1HH;
+  let r2RX =  cosR1A * (r2CX - r1CX) + sinR1A * (r2CY - r1CY) + r1CX - r2HW;
+  let r2RY = -sinR1A * (r2CX - r1CX) + cosR1A * (r2CY - r1CY) + r1CY - r2HH;
+
+  let cosR1AR2A = Math.abs(cosR1A * cosR2A + sinR1A * sinR2A);
+  let sinR1AR2A = Math.abs(sinR1A * cosR2A - cosR1A * sinR2A);
+  let cosR2AR1A = Math.abs(cosR2A * cosR1A + sinR2A * sinR1A);
+  let sinR2AR1A = Math.abs(sinR2A * cosR1A - cosR2A * sinR1A);
+
+  let r1BBH = r1W * sinR1AR2A + r1H * cosR1AR2A;
+  let r1BBW = r1W * cosR1AR2A + r1H * sinR1AR2A;
+  let r1BBX = r1RX + r1HW - r1BBW / 2;
+  let r1BBY = r1RY + r1HH - r1BBH / 2;
+
+  let r2BBH = r2W * sinR2AR1A + r2H * cosR2AR1A;
+  let r2BBW = r2W * cosR2AR1A + r2H * sinR2AR1A;
+  let r2BBX = r2RX + r2HW - r2BBW / 2;
+  let r2BBY = r2RY + r2HH - r2BBH / 2;
+
+  return r1X &lt; r2BBX + r2BBW &amp;&amp; r1X + r1W &gt; r2BBX &amp;&amp; r1Y &lt; r2BBY + r2BBH &amp;&amp; r1Y + r1H &gt; r2BBY &amp;&amp;
+         r2X &lt; r1BBX + r1BBW &amp;&amp; r2X + r2W &gt; r1BBX &amp;&amp; r2Y &lt; r1BBY + r1BBH &amp;&amp; r2Y + r2H &gt; r1BBY;
+}
+</code></pre>
+<p>It&rsquo;s a bit lengthy unfortunately but I also think it&rsquo;s pretty pretty with its symmetry. I&rsquo;m not sure if this is a novel technique or if it&rsquo;s known, but I&rsquo;m pretty proud of it regardless. Feel free to let me know if you can think of any further optimizations to speed this up some more, or if you&rsquo;re aware of any other techniques for calculating collisions between rotated rectangles.</p>
+<p>I&rsquo;ll try my best to answer questions, but I must admit my mathematical skill is not the greatest, so no promises! Anyways, thanks for reading, and enjoy! Here&rsquo;s a demo below (use WASD to control the one rectangle)</p>
+<html><canvas></canvas></html>
+<style>body{margin:0;overflow:hidden}canvas{border:1px solid #333}</style>
+<script>let canvas=document.querySelector("canvas"),ctx=canvas.getContext("2d"),speed=1,xVel=0,yVel=0;document.addEventListener("keydown",a=>{switch(a.key){case"a":xVel=-speed;break;case"d":xVel=speed;break;case"w":yVel=-speed;break;case"s":yVel=speed;break;case"q":myR1A+=.1;break}}),document.addEventListener("keyup",a=>{switch(a.key){case"a":xVel=0;break;case"d":xVel=0;break;case"w":yVel=0;break;case"s":yVel=0;break}});function drawRectangle(a,b,c,d){ctx.beginPath(),ctx.rect(a,b,c,d),ctx.stroke()}function rotateCanvas(c,a,b){ctx.translate(a,b),ctx.rotate(c),ctx.translate(-a,-b)}function drawRotatedRectangle(a,b,c,d,e){let f=a+c/2,g=b+d/2;rotateCanvas(e,f,g),drawRectangle(a,b,c,d),rotateCanvas(-e,f,g)}function isCollision(t,p,k,l,v,r,q,i,j,G){let o=k/2,s=l/2,m=i/2,n=j/2,e=t+o,h=p+s,g=r+m,f=q+n,d=Math.cos(v),c=Math.sin(v),b=Math.cos(G),a=Math.sin(G),L=b*(e-g)+a*(h-f)+g-o,K=-a*(e-g)+b*(h-f)+f-s,J=d*(g-e)+c*(f-h)+e-m,I=-c*(g-e)+d*(f-h)+h-n,A=Math.abs(d*b+c*a),B=Math.abs(c*b-d*a),C=Math.abs(b*d+a*c),D=Math.abs(a*d-b*c),E=k*B+l*A,F=k*A+l*B,u=L+o-F/2,z=K+s-E/2,y=i*D+j*C,x=i*C+j*D,w=J+m-x/2,H=I+n-y/2;return t<w+x&&t+k>w&&p<H+y&&p+l>H&&r<u+F&&r+i>u&&q<z+E&&q+j>z}let myR1X=200,myR1Y=212,myR1W=150,myR1H=30,myR1A=-30*(Math.PI/180),myR2X=230,myR2Y=258,myR2W=35,myR2H=25,myR2A=-110*(Math.PI/180);function renderLoop(b){canvas.width=400,canvas.height=400;let a=isCollision(myR1X,myR1Y,myR1W,myR1H,myR1A,myR2X,myR2Y,myR2W,myR2H,myR2A);ctx.strokeStyle=a?"#ff0000":"#000000",drawRotatedRectangle(myR1X,myR1Y,myR1W,myR1H,myR1A),drawRotatedRectangle(myR2X,myR2Y,myR2W,myR2H,myR2A),myR1X+=xVel,myR1Y+=yVel,requestAnimationFrame(renderLoop)}renderLoop()</script>
+</div>
+<footer class=post-footer>
+<ul class=post-tags>
+<li><a href=/tags/javascript/>javascript</a></li>
+<li><a href=/tags/math/>math</a></li>
+<li><a href=/tags/collision/>collision</a></li>
+</ul>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2021 <a href>Programming Posts</a></span>
+</footer>
+<script>let menu=document.getElementById('menu');menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)},document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

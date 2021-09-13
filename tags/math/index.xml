@@ -12,10 +12,10 @@
     <lastBuildDate>Sun, 12 Sep 2021 11:30:03 +0000</lastBuildDate><atom:link href="/tags/math/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>How to check if there was a collision between two rotated rectangles</title>
-      <link>/post/test/</link>
+      <link>/post/rotated-rectangle-collisions/</link>
       <pubDate>Sun, 12 Sep 2021 11:30:03 +0000</pubDate>
       
-      <guid>/post/test/</guid>
+      <guid>/post/rotated-rectangle-collisions/</guid>
       <description>Recently I had the need to determine whether or not two rotated rectangles were colliding. These rectangles were rotated around their centers and were of the form x, y, w, h, a, where a is the rotation angle in radians.
 I searched online for a bit and found out that one way is to convert the rectangles into a series of line segments and then use the Separating Axis Theorem to determine if there was an intersection.</description>
     </item>
